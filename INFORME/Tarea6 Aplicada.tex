@@ -14,7 +14,7 @@ department = Escuela de Estadística,
 program = Programa Académico de Estadística,
 subject = Estadística Aplicada II,
 city = Cali,
-month = 5,
+month = 6,
 year = 2018]
 
 % -------------------------------------------------------------------------------------
@@ -140,11 +140,35 @@ regresores que debe usarse en el modelo. La definición de un subconjunto adecuad
 ~\\El $R^2_{Ajustado}$ se define como:
 $$R^2_{Adj}=1-\frac{N-1}{N-k-1}(1-R^2)$$ 
 ~\\Donde N es el tamaño de muestra y k es la cantidad de parámetros del modelo y $R^2=\frac{SCR_{D}}{SCT_{D}}=\frac{\sum\limits_{i=1}^{n}(\hat{y_{i}}-\bar{y})^2}{\sum\limits_{i=1}^{n}(y_{i}-\bar{y})^2}$.
-\item Backward (selección hacia atrás):
-\item StepAIC (selección paso a paso con el criterio de información de Akakike (AIC)):
+\item Backward (selección hacia atrás): Como su nombre lo indica se comienza por considerar incluidas en el modelo teórico a todas las variables disponibles y se van eliminando del modelo de una en una según su capacidad explicativa. Para esto,  la primera variable que se elimina es aquella que presenta un menor coeficiente de correlación parcial  con la variable dependiente o lo que es equivalente, un menor valor del estadístico t y así sucesivamente hasta llegar a una situación en la que la eliminación de una variable más suponga un descenso demasiado acusado en el coeficiente de determinación.
+~\\Algoritmo:
+\begin{itemize}
+\item[1.] Se toma el modelo completo (con todas las variables disponibles)
+\item[2.] Se obtiene la reducción de la variación de los datos para cada variable, denotado por, $R(\vec{\beta_{1}}|\vec{\beta_{2}})$ (es la suma de cuadrados de la regresión del modelo completo menos la suma de cuadrados de la regresión del modelo reducido).
+\item[3.] Se selecciona como candidata a salir, aquella variable cuya reducción sea la más pequeña.
+\item[4.] Se realiza una prueba de significancia para el coeficiente $\beta$ correspondiente a la variable candidata a salir. Si esta no se rechaza, estaríamos concluyendo que $\beta=0$, y por lo tanto la variable sale del modelo.
+\item[5.] Se toma como modelo completo al modelo resultante sin la variable excluida del item anterior y se hace el mismo procedimiento. 
+\item[6.] El algoritmo se detiene cuando la prueba de significancia se rechace, y se toma como modelo final, el modelo completo hasta esa prueba de significancia.
+\end{itemize}
+\item StepAIC (selección paso a paso con el criterio de información de Akakike (AIC)): Consiste en una combinación entre el Forward y el Backward. En el primer paso se procede como en el método forward pero a diferencia de éste en el que cuando una variable entra en el modelo ya no vuelve a salir, en el procedimiento stepwise es posible que la inclusión de una nueva variable haga que otra que ya estaba en el modelo resulte redundante y sea ``expulsada'' de él.
+Cuando se aplica este tipo de procedimientos tenemos que tener en cuenta cual sería la condición para suprimir o incluir un término. Para ello podemos considerar dos criterios: criterios de significación del término y criterios de ajuste global.
+\begin{itemize}
+\item Criterios de significación: En un método backward se suprimirá el término que resulte menos significativo, y en un método forward se añadirá el término, que al añadirlo al modelo resulte más significativo. Un criterio de significación puede ser la significación de cada coeficiente (SCR)
+\item Criterios globales: En vez de usar la significación de cada coeficiente, podemos basarnos en un criterio global, una medida global de cada modelo, de modo que tenga en cuenta el ajuste y el exceso de parámetros. Escogeremos el modelo cuya medida global sea mejor. Como criterios destacamos el Criterio de Información de Akaike (AIC) y el Criterio de Información de Bayes (BIC). Se trata de buscar un modelo cuyo AIC o BIC sea pequeño, ya que en ese caso habría una verosimilitud muy grande y pocos parámetros.
+\end{itemize}
+Para este caso tenemos como algoritmo el Stepwise, con un criterios global de Información de Akaike (AIC). Como ya se mencionó se desea elegir el modelo que presente menor AIC.
+~\\Algoritmo:
+\begin{itemize}
+\item[1.] Se toma como modelo inicial, solo con el intercepto, es decir, un modelo de la forma $Y=\beta_{0}$ y se calcula el AIC correspondiente
+\item[2.] Se ajustan los modelos para cada una de las variables disponibles, es decir, un modelo de la forma $=\beta_{0}+\beta_{1}X_{i}$ en nuestro caso $i=1,2,3,4,5,6$. Para cada uno de ellos se calcula el AIC e ingresa al modelo la variable cuyo AIC sea menor y a su vez debe ser menor que el modelo inicial.
+\item[3.] Se toma el nuevo modelo como inicial y se hace el mismo procedimiento. Se calcula su AIC y se ajustan los modelos para cada una de las variables disponibles (modelos de la forma $Y=\beta_{0}+\beta_{1}X_{i}+\beta_{2}X_{j}$), incluso para la variable que entró se calcula un modelo sin ella (modelo de la forma $Y=\beta_{0}$ ). Se calcula nuevamente el AIC para cada uno de ellos y se ingresa la variable cuyo modelo tenga un AIC menor y este a su vez sea menor que el del modelo inicial, en caso de que el AIC menor corresponda al modelo en el cual se quita la variable que entró, esta sale del modelo.
+\item[4.] Se procede de la misma manera hasta que el AIC de las variables a entrar o a salir ninguno sea menor que el AIC del modelo inicial.
+\item[5.] De esta manera tendríamos un modelo final con todas las variables que ingresaron.
+\end{itemize}
+
 \end{itemize}
 \section{Análisis del modelo seleccionado}
-~\\ Los modelos seleccionados por el método del $R^2_{Ajustado}$ y por los algoritmos Backward y StepAIC fueron exactamente el mismo, es decir, los tres métodos nos arrojaron las mismas variables seleccionadas que fueron Ingreso mediano, Edad mediana, Total de habitaciones, Población y Hogares (solo eliminaron la variable Total de Dormitorios).
+~\\ Los modelos seleccionados por el método del $R^2_{Ajustado}$ con el paquete \citeasnoun{L} de \citeasnoun{R} y por los algoritmos Backward y StepAIC con el paquete \citeasnoun{Mass} fueron exactamente el mismo, es decir, los tres métodos nos arrojaron las mismas variables seleccionadas que fueron Ingreso mediano, Edad mediana, Total de habitaciones, Población y Hogares (solo eliminaron la variable Total de Dormitorios).
 ~\\Ese modelo fue:
 ~\\$$\hat{ValorMediano}=52921.68807+24923.24378 IngresoMediano+ 3484.16424 EdadMediana$$
 $$+17.58804 TotalHabitaciones -118.65234 Poblacion +243.26500 Hogares$$
@@ -178,16 +202,57 @@ $\hat{\sigma}$ & $R^2$ & $R^2_{Ajustado}$ & Estadístico F & P Valor \\
 ~\\Podemos ver en las dos tablas anteriores que todas las variables incluidas son significativas (el p valor de cada una de ellas es menor a 0.05) y por tanto, el modelo en general también es significativo. Además, tanto el $R^2$ como el $R^2_{Ajustado}$ son casi los mismos que los del modelo completo (0.5425 y 0.537 respectivamente), por lo tanto podríamos concluir que la inclusión de la variable Total de Dormitorios no daba un aporte adicional a la explicación del valor mediano de la vivienda. Adicionalmente, la desviación del modelo a los datos disminuyó un poco (de 82000 del modelo completo a 81990 en el modelo con selección de variables), por lo cuál se podría decir que la variable excluida en este problema en particular solo servía para aumentar los costos de recolección de datos y para aumentar la desviación del modelo y en general, las desviaciones de los valores ajustados.
 
 \section{Ventajas y desventajas de los algoritmos y métodos utilizados}
-~\\
+~\\Como ventajas o desventajas para el método y para los dos algoritmos tenemos las siguientes:
+\begin{itemize}
+\item Desventajas:
+\begin{itemize}
+\item $R^2_{Ajustado}$: 
+\begin{itemize}
+\item[1.] Es el mas tedioso de todos en cuanto a cálculos, ya que toca ajustar todos los posibles modelos para todas las posibles combinaciones de variables, es decir, se deben ajustar todos los posibles modelos (6) para una variable, todos los posibles (15) para 2 variables, y así sucesivamente. En total en este caso son $6 \choose 1$ + $ 6 \choose 2$ + $ 6\choose 3$ +...+ $6\choose 6$ $=63$ modelos que se deben ajustar.
+\item[2.] El criterio de selección es el más débil, ya que solo usamos el $R^2_{Ajustado}$ para decidir, y está demostrado que es mejor criterio el AIC porque no solo penaliza por la cantidad de parámetros o la complejidad del modelo, sino también por la capacidad predictiva que este tiene.
+\end{itemize}
+\item Algoritmo Backward:
+\begin{itemize}
+\item[1.] Tiene la desventaja de necesitar mucha capacidad de cálculo si la cantidad de variables regresoras es grande.
+\item[2.] Puede conducir a problemas de multicolinealidad si las variables están relacionadas, ya que esta no evalúa la salida de posibles variables ante la entrada de otras.
+\end{itemize}
+\item Algoritmo StepAIC:
+\begin{itemize}
+\item[1.] La única desventaja que logramos encontrar en este método es la gran cantidad de cálculos que se deben hacer, ya que se tienen que ajustar demasiados modelos y encontrar su AIC correspondiente.
+\end{itemize}
+\end{itemize}
+\item Ventajas:
+\begin{itemize}
+\item $R^2_{Ajustado}$: 
+\begin{itemize}
+\item[1.] La regla de decisión y de selección es muy sencilla de calcular y de aplicar.
+\end{itemize}
+\item Algoritmo Backward:
+\begin{itemize}
+\item[1.] No elimina variables significativas para el modelo.
+\item[2.] No necesita que se defina un término como umbral, ni que se defina la cantidad de variables a seleccionar.
+\end{itemize}
+\item Algoritmo StepAIC:
+\begin{itemize}
+\item[1.] Usa como criterio de selección el criterio de información de Akaike (AIC), el cuál es un criterio bastante completo y mejor que el $R^2_{Ajustado}$
+\item[2.] Este algoritmo evita los posibles problemas de multicolinealidad que se pueden generar usando, por ejemplo, el Backward o el Fordward, ya que este no mantiene fijas en el modelo las variables que ya entraron en una etapa, es decir, siempre se esta evaluando la salida de variables ante la entrada de nuevas.
+\end{itemize}
+\end{itemize}
+\end{itemize}
+
+
 \section{Conclusiones}
+~\\Con respecto al método y a los algoritmos de selección utilizados, podemos concluir que el mejor es el StepAIC, ya que incluye el Backward y además incorpora un criterio de selección que es el AIC, el cuál es mejor que el $R^2_{Ajustado}$. Adicionalmente, este criterio como ya se mencionó en las ventajas, evalúa la posible salida de variables ante la entrada de otras, es decir, tiene en cuenta la interacción o el aporte y la capacidad explicativa que le dan las variables conjuntamente, evitando de esa forma problemas de multicolinealidad. En este caso, casualmente todos los métodos nos arrojaron el mismo modelo (sin la variable total de dormitorios), por lo que no podemos hacer una comparación entre los modelos obtenidos y decidir cual es mejor, pero esperamos que al usarlo con otros datos, el mejor modelo sea el obtenido por el método StepAIC.
+
+~\\De manera general, teniendo en cuenta el trabajo acumulado en estos datos y en tratar de ajustar un modelo para la variable Valor mediano de la vivienda, podemos concluir que este es el mejor modelo que logramos obtener por el método MCO, ya que disminuyó la varianza del modelo manteniendo constante el $R^2_{Ajustado}$, sin embargo, vimos en la Tarea 3, que los supuestos de este modelo no se cumplen, por lo cuál se hace inadecuado el uso de los mínimos cuadrados ordinarios. Entonces se puede decir que este siendo el mejor modelo que logramos obtener por MCO, no es recomendable su uso, ya que sus estimaciones pueden no ser efectivas por la varianza de ellas y en general por el incumplimiento de sus supuestos.
 
 \setlength{\parskip}{1mm}
 ~\\\nocite{apl}
 \nocite{Reg}
 \nocite{F}
-\nocite{R}
 \nocite{Tus}
-\nocite{PM}
+\nocite{Lm}
+
 
 % //// --------------------------------------------------------------------------------
 % -------------------------------------------------------------------------------------

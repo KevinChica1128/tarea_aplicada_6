@@ -15,8 +15,10 @@ modelostepB<-step(modelo,direction = "backward") #Por AIC
 summary(modelostepB) #AIC Backward
 modelostepF<-step(modelo,direction = "forward")
 summary(modelostepF)
-modelostepBo<-step(modelo,direction = "both")
+modelostepBo<-step(mod0, scope=list(lower=mod0,upper=modelo) ,direction = "both") #StepAIC
 summary(modelostepBo)
+
+summary(stepAIC(modelo,direction = "both",trace = TRUE))
 #Con el código 1
 library(leaps)
 modeloback <- regsubsets(cadata$Valor_mediano_de_la_casa ~ cadata$Ingreso_mediano+
@@ -38,4 +40,9 @@ Y<-cadata$Valor_mediano_de_la_casa
 modelo3<-leaps(X,Y,method = "adjr2")
 which.max(modelo3$adjr2)
 
-
+#Backward:
+mod0<-lm(cadata$Valor_mediano_de_la_casa~1)
+AIC(mod0)
+summary(mod0)
+mod.backward <- stepAIC(modelo, scope = list(lower = mod0),direction = "backward")
+mod.forward <- stepAIC(mod0,scope=list(upper=modelo),direction = "forward")

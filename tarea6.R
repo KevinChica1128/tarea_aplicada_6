@@ -1,6 +1,7 @@
 #Tarea 6 Aplicada II
 #Kevin García - Alejandro Vargas
 #Selección de variables
+library("MASS")
 cadata <- read.csv("~/GitHub/tarea_aplicada_6/cadata.txt", sep="")
 cadata<- cadata[-c(1:15528,16029:20640),]
 
@@ -49,5 +50,6 @@ which.max(modelo3$adjr2)
 mod0<-lm(cadata$Valor_mediano_de_la_casa~1)
 AIC(mod0)
 summary(mod0)
+mod.backward1<-step(modelo, scope = list(lower = mod0),direction = "backward")
 mod.backward <- stepAIC(modelo, scope = list(lower = mod0),direction = "backward")
 mod.forward <- stepAIC(mod0,scope=list(upper=modelo),direction = "forward")

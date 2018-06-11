@@ -9,7 +9,7 @@
 \usepackage{ragged2e}
 \setbeamertemplate{navigation symbols}{} 
 \author[Kevin García - Alejandro Vargas]{Kevin García 1533173 \newline Alejandro Vargas 1525953}
-\title[Tarea 5: Regresión Robusta]{Tarea 5:Diagnósticos en el Análisis de Regresión, Regresión a Través del Origen y Regresión Robusta}
+\title[Tarea 6: Selección de variables]{Tarea 6:Selección de variables}
 
 
 
@@ -30,383 +30,233 @@
 %\end{frame}
 \begin{frame}
 \frametitle{Introducción}
-~\\En esta presentación se tratara de encontrar un modelo lineal adecuado, para predecir la cantidad de $PM_{2.5}$ a partir de la cantidad de $PM_{10}$, para ello se ajustara un modelo simple por MCO y se llevaran a cabo pruebas de diagnostico para detectar e identificar puntos con altos residuales, atípicos, influyentes o de alto leverage, y se tratará de mejorar el modelo llevando a cabo un modelo ajustado que pase por el origen, al cuál se le aplicaran nuevamente las pruebas de diagnostico y se le evaluaran el cumplimiento de los supuestos.Finalmente, se aplicara regresión robusta y se compararan todos los modelos, eligiendo el mejor o el más adecuado.
+~\\En este trabajo se presentarán un método de selección de modelos que es el $R^2_{Ajustado}$ y dos algoritmos que son el Backward y el StepAIC, con ellos, se tratará de encontrar el mejor modelo posible para los 500 datos seleccionados de la base de datos 'Cadata', y se analizará el modelo obtenido. Además, se presentaran una serie de ventajas y desventajas de cada uno de los métodos y se formularan conclusiones a partir de los resultados arrojados.
 \end{frame}
 
 \begin{frame}
-\frametitle{Definiciones}
-~\\El material particulado respirable presente en la atmósfera de nuestras ciudades en forma sólida o líquida (polvo, cenizas, hollín, partículas metálicas, cemento y polen, entre otras) se puede dividir, según su tamaño, en dos grupos principales. A las de diámetro aerodinámico igual o inferior a los 10 $\mu m$ o 10 micrómetros (1 $\mu m$ corresponde a la milésima parte de un milímetro) se las denomina $PM_{10}$ (partículas respirables) y a la fracción respirable más pequeña, $PM_{2.5}$ (partículas finas). Estas últimas están constituidas por aquellas partículas de diámetro aerodinámico inferior o igual a los 2.5 micrómetros, es decir, son 100 veces más delgadas que un cabello humano, además son más peligrosas, ya que, al ser inhaladas, pueden alcanzar las zonas periféricas de los bronquiolos y alterar el intercambio pulmonar de gases.
+\frametitle{Introducción}
+~\\En la mayoría de los problemas de construcción de modelos el analista tiene un grupo de regresores candidatos y debe determinar el subconjunto real de
+regresores que debe usarse en el modelo. La definición de un subconjunto adecuado de regresores para el modelo es lo que se llama problema de selección de variables.
 \end{frame}
 
 \begin{frame}
-\frametitle{Modelo Ajustado}
-~\\~\\Para ajustar un modelo lineal para estas partículas, decidimos que la variable independiente o regresora fuera el $PM_{10}$ y la variable dependiente fuera el $PM_{2.5}$, se hizo esta selección, ya que las partículas con un diámetro menor o igual a 10 micrómetros son más fáciles de medir que las de diámetro menor o igual a 2.5 micrómetros, y la idea es que se ahorren costos y esfuerzo humano adicional, midiendo solo las partículas $PM_{10}$ (que son un poco más grandes) y a partir de ellas logren obtener una buena estimación para las partículas $PM_{2.5}$.
+\frametitle{Introducción}
+~\\La construcción de un modelo de regresión que sólo incluya un subconjunto de los regresores disponibles implica dos objetivos contrapuestos: 1) Se desea que el modelo incluya tantos regresores como sea posible, para que el contenido de información en ellos pueda influir sobre el valor predicho de y. 2) Se desea que el modelo incluya los menos regresores que sea posible, porque la varianza de la predicción $\hat{y}$ aumenta a medida que aumenta la cantidad de regresores. También, mientras más regresores haya en un modelo, los costos de recolección de datos y los de mantenimiento de modelo serán mayores. Entonces, con la selección de variables se trata de encontrar el punto medio entre los dos objetivos anteriores, logrando hallar así la 'mejor' recta de regresión.
 \end{frame}
 
 \begin{frame}
-\frametitle{Modelo Ajustado}
-~\\Teniendo en cuenta lo anterior, el modelo planteado es:
-$$PM_{2.5}=\beta_{0}+\beta_{1}PM_{10}$$
-~\\El modelo ajustado, usando MCO es:
-$$\hat{PM_{2.5}}=-4.29990+0.45776PM_{10}$$
+\frametitle{Modelo Completo}
+~\\El modelo completo con todas las variables bajo el cual se está trabajando es:
+
+~\\$$\hat{ValorMediano} = 57720.52 + 24261.20IngresoMediano +$$
+$$3443.94EdadMediana + 19.09TotalHabitaciones$$
+$$ - 67.72TotalDormitorios - 121.66Poblacion +315.92Hogares $$
 \end{frame}
 
 \begin{frame}
-\frametitle{Bondad del modelo}
-~\\Para este modelo ajustado, tenemos los siguientes resultados que nos ayudaran a juzgar que tan bueno es:
-\begin{center}
-~\\\begin{tabular}{|c|c|c|c|c|}
-\hline 
- & Estimación & Desviación Estandár & Estadistico T & P valor \\ 
-\hline 
-$\beta_{0}$ & -4.29990 & 1.27362 & -3.376 & 0.000916 \\ 
-\hline 
-$\beta_{1}$ & 0.45776 & 0.03051 & 15.001 & $<2e-16$ \\ 
-\hline 
-\end{tabular} 
-\end{center}
-~\\En la tabla anterior se puede apreciar que ambas estimaciones de los coeficientes son significativas a muy bajos niveles de $\alpha$,ya que el p valor para ambos es casi cero, además las desviaciones estándar de ambos son muy bajas, esto nos indica que están muy cerca del verdadero valor del parámetro, ó en otras palabras, tienen una buena precisión.
-\end{frame}
-
-\begin{frame}
-\frametitle{Bondad del modelo}
-\begin{center}
-\begin{tabular}{|c|c|c|c|c|}
-\hline 
-$R^2$ & $R^2_{Ajustado}$ & $\hat{\sigma}$ & Estadistico F & Valor p \\ 
-\hline 
-0.5755 & 0.5729 & 6.7707 & 225 & $<2.2e-16$ \\ 
-\hline 
-\end{tabular} 
-\end{center}
-~\\En esta tabla, podemos ver que tanto el $R^2$ como el $R^2_{Ajustado}$ son considerablemente altos, estos nos indican que cerca del $57\%$ de la variabilidad total de la variable $PM_{2.5}$ es explicada por la variable $PM_{10}$, además la desviación del modelo ajustado a los datos es de 6.7707, lo cuál se podría considerar un buen valor ya que no es tan alto, y finalmente, vemos que el valor p de la prueba de significancia es casi cero, esto nos dice que $\beta_{1}\neq 0$ o en otras palabras, que el modelo es significativo.
-\end{frame}
-
-\begin{frame}
-\frametitle{Pruebas de diagnostico}
-~\\Para detectar los puntos con altos residuales, atípicos, influyentes o de alto leverage, se van a realizar las gráficas comunes para tener idea sobre cuales parejas de datos podrían ser tales puntos (gráfica de dispersión con recta ajustada, gráfica de residuales estandarizados contra los Y ajustados y gráfica q-qplot), y además, se utilizara el criterio de la matriz hat y el residual studentizado, y las medidas de influencia D de Cook, DFFITS, DFBETAS y COVRATIO.
-\end{frame}
-
-\begin{frame}
-\frametitle{Pruebas de diagnostico}
+\frametitle{Descripción de criterios y algoritmos de selección}
 \begin{itemize}
-\item[a)] \textbf{Gráfica de dispersión:}
+\item $R^2_{Ajustado}$: Usando el método del $R^2_{Ajustado}$, se deben realizar todas las posibles combinaciones de modelos a partir de las variables que tenemos, y seleccionar el modelo que tenga mayor $R^2_{Ajustado}$. Este método surgió como una alternativa al método del coeficiente de determinación $R^2$, ya que el $R^2$ no tiene en cuenta la cantidad de parámetros del modelo, es decir, este siempre aumenta a medida que se ingresa una nueva variable al modelo.
+~\\El $R^2_{Ajustado}$ se define como:
+$$R^2_{Adj}=1-\frac{N-1}{N-k-1}(1-R^2)$$ 
+~\\Donde N es el tamaño de muestra y k es la cantidad de parámetros del modelo y $R^2=\frac{SCR_{D}}{SCT_{D}}=\frac{\sum\limits_{i=1}^{n}(\hat{y_{i}}-\bar{y})^2}{\sum\limits_{i=1}^{n}(y_{i}-\bar{y})^2}$.
+\end{itemize}
+\end{frame}
+
+\begin{frame}
+\frametitle{Descripción de criterios y algoritmos de selección}
+\begin{itemize}
+\item Backward (selección hacia atrás): Como su nombre lo indica se comienza por considerar incluidas en el modelo teórico a todas las variables disponibles y se van eliminando del modelo de una en una según su capacidad explicativa. Para esto,  la primera variable que se elimina es aquella que presenta un menor coeficiente de correlación parcial  con la variable dependiente o lo que es equivalente, un menor valor del estadístico W y así sucesivamente hasta llegar a una situación en la que la eliminación de una variable más suponga un descenso demasiado acusado en el coeficiente de determinación.
+\end{itemize}
+\end{frame}
+
+\begin{frame}
+\frametitle{Descripción de criterios y algoritmos de selección}
+~\\Algoritmo:
+\begin{itemize}
+\item[1.] Se toma el modelo completo (con todas las variables disponibles)
+\item[2.] Se obtiene la reducción de la variación de los datos para cada variable, denotado por, $R(\vec{\beta_{1}}|\vec{\beta_{2}})$ (es la suma de cuadrados de la regresión del modelo completo menos la suma de cuadrados de la regresión del modelo reducido).
+\item[3.] Se selecciona como candidata a salir, aquella variable cuya reducción sea la más pequeña.
+\item[4.] Se realiza una prueba de significancia para el coeficiente $\beta$ correspondiente a la variable candidata a salir. Si esta no se rechaza, estaríamos concluyendo que $\beta=0$, y por lo tanto la variable sale del modelo.
+\end{itemize}
+\end{frame}
+
+\begin{frame}
+\frametitle{Descripción de criterios y algoritmos de selección}
+\begin{itemize}
+\item[5.] Se toma como modelo completo al modelo resultante sin la variable excluida del item anterior y se hace el mismo procedimiento. 
+\item[6.] El algoritmo se detiene cuando la prueba de significancia se rechace, y se toma como modelo final, el modelo completo hasta esa prueba de significancia.
+\end{itemize}
+\end{frame}
+
+\begin{frame}
+\frametitle{Descripción de criterios y algoritmos de selección}
+\begin{itemize}
+\item StepAIC (selección paso a paso con el criterio de información de Akakike (AIC)): Consiste en una combinación entre el Forward y el Backward. En el primer paso se procede como en el método forward pero a diferencia de éste en el que cuando una variable entra en el modelo ya no vuelve a salir, en el procedimiento stepwise es posible que la inclusión de una nueva variable haga que otra que ya estaba en el modelo resulte redundante y sea ``expulsada'' de él.
+Cuando se aplica este tipo de procedimientos tenemos que tener en cuenta cual sería la condición para suprimir o incluir un término. Para ello podemos considerar dos criterios: criterios de significación del término y criterios de ajuste global.
+\end{itemize}
+\end{frame}
+
+\begin{frame}
+\frametitle{Descripción de criterios y algoritmos de selección}
+\begin{itemize}
+\item[-] Criterios de significación: En un método backward se suprimirá el término que resulte menos significativo, y en un método forward se añadirá el término, que al añadirlo al modelo resulte más significativo. Un criterio de significación puede ser la significación de cada coeficiente (SCR)
+\item[-] Criterios globales: En vez de usar la significación de cada coeficiente, podemos basarnos en un criterio global, una medida global de cada modelo, de modo que tenga en cuenta el ajuste y el exceso de parámetros. Escogeremos el modelo cuya medida global sea mejor. Como criterios destacamos el Criterio de Información de Akaike (AIC) y el Criterio de Información de Bayes (BIC). Se trata de buscar un modelo cuyo AIC o BIC sea pequeño, ya que en ese caso habría una verosimilitud muy grande y pocos parámetros.
+\end{itemize}
+\end{frame}
+
+\begin{frame}
+\frametitle{Descripción de criterios y algoritmos de selección}
+Para este caso tenemos como algoritmo el Stepwise, con un criterios global de Información de Akaike (AIC). Como ya se mencionó se desea elegir el modelo que presente menor AIC.
+~\\Algoritmo:
+\begin{itemize}
+\item[1.] Se toma como modelo inicial, solo con el intercepto, es decir, un modelo de la forma $Y=\beta_{0}$ y se calcula el AIC correspondiente
+\item[2.] Se ajustan los modelos para cada una de las variables disponibles, es decir, un modelo de la forma $=\beta_{0}+\beta_{1}X_{i}$ en nuestro caso $i=1,2,3,4,5,6$. Para cada uno de ellos se calcula el AIC e ingresa al modelo la variable cuyo AIC sea menor y a su vez debe ser menor que el modelo inicial.
+\end{itemize}
+\end{frame}
+
+\begin{frame}
+\frametitle{Descripción de criterios y algoritmos de selección}
+\begin{itemize}
+\item[3.] Se toma el nuevo modelo como inicial y se hace el mismo procedimiento. Se calcula su AIC y se ajustan los modelos para cada una de las variables disponibles (modelos de la forma $Y=\beta_{0}+\beta_{1}X_{i}+\beta_{2}X_{j}$), incluso para la variable que entró se calcula un modelo sin ella (modelo de la forma $Y=\beta_{0}$ ). Se calcula nuevamente el AIC para cada uno de ellos y se ingresa la variable cuyo modelo tenga un AIC menor y este a su vez sea menor que el del modelo inicial, en caso de que el AIC menor corresponda al modelo en el cual se quita la variable que entró, esta sale del modelo.
+\item[4.] Se procede de la misma manera hasta que el AIC de las variables a entrar o a salir ninguno sea menor que el AIC del modelo inicial.
+\item[5.] De esta manera tendríamos un modelo final con todas las variables que ingresaron.
+\end{itemize}
+\end{frame}
+
+\begin{frame}
+\frametitle{Análisis del modelo seleccionado}
+~\\ Los modelos seleccionados por el método del $R^2_{Ajustado}$ y por los algoritmos Backward y StepAIC con el paquete fueron exactamente el mismo, es decir, los tres métodos nos arrojaron las mismas variables seleccionadas que fueron Ingreso mediano, Edad mediana, Total de habitaciones, Población y Hogares (solo eliminaron la variable Total de Dormitorios).
+~\\Ese modelo fue:
+~\\$\hat{ValorMediano}=52921.68807+24923.24378 IngresoMediano$
+$$+ 3484.16424 EdadMediana+17.58804 TotalHabitaciones$$
+$$-118.65234 Poblacion +243.26500 Hogares$$
+\end{frame}
+
+\begin{frame}
+\frametitle{Análisis del modelo seleccionado}
 \begin{figure}[h]
   \centering
-  \includegraphics[scale=0.32]{imagenes/ma.pdf}
-  \caption{Gráfico de dispersión con recta ajustada y valores candidatos a atipicos}\label{figura1}
+  \includegraphics[scale=0.3]{imagenes/r2.pdf}
+  \caption{Gráfico de número de variables contra $R^2_{Ajustado}$}\label{figura1}
 \end{figure}
-\end{itemize}
 \end{frame}
 
 \begin{frame}
-\frametitle{Pruebas de diagnostico}
-\begin{itemize}
-\item[b)] \textbf{Gráfica de $\hat{d}$ vs $\hat{y}$:}
-\begin{figure}[h]
-  \centering
-  \includegraphics[scale=0.32]{imagenes/rv.pdf}
-  \caption{Gráfico de residuales estandarizados vs los valores ajustados}\label{figura1}
-\end{figure}
-\end{itemize}
+\frametitle{Análisis del modelo seleccionado}
+~\\En la imagen anterior podemos ver la representación gráfica del método del $R^2_{Ajustado}$, los 6 modelos representados correspondientes a 1,2,3,4,5 y 6 variables, son los mejores modelos que se pueden construir con tal número de variables con respecto al $R^2_{Ajustado}$, es decir, la gráfica muestra el $R^2_{Ajustado}$ del mejor modelo con cada número de variables pero en el trasfondo ya se han ajustado todos los posibles modelos por cantidad de variables. Lo que hace el método es elegir al modelo con el $R^2_{Ajustado}$ más alto, por lo cuál elige al mejor modelo con 5 variables que es el mencionado anteriormente.
 \end{frame}
 
 \begin{frame}
-\frametitle{Pruebas de diagnostico}
-\begin{itemize}
-\item[c)] \textbf{q-qplot de los residuales :}
-\begin{figure}[h]
-  \centering
-  \includegraphics[scale=0.32]{imagenes/qq.pdf}
-  \caption{q-qplot de los residuales}\label{figura1}
-\end{figure}
-\end{itemize}
-\end{frame}
-
-\begin{frame}
-\frametitle{Pruebas de diagnostico}
-\begin{itemize}
-\item[d)] \textbf{Matriz HAT y residual Studentizado:} La matriz HAT definida como $H=x(x'x)^{-1}x^{T}$ y más específicamente el i-ésimo valor de su diagonal $h_{ii}=x'_{i}(X'X)^{-1}x_{i}$ y el residual Studentizado, definido como $\hat{r_{i}}=\frac{\hat{e_{i}}}{\sqrt{1-h_{ii}}\hat{\sigma}}$ sirven para ver si los puntos pueden ser influyentes o solo de balanceo, considerando los siguientes criterios:
-\begin{itemize}
-\item[-] Si $h_{ii}>\frac{2p}{n}=2\bar{h}=0.02381$ (como $\sum h_{ii}=p \rightarrow \bar{h}=\frac{p}{n}$) y el residual Studentizado es grande ($>3$), entonces la i-ésima observación puede considerarse influyente.
-\item[-] Si solamente $h_{ii}>\frac{2p}{n}=0.02381$, entonces la i-ésima observación es solo de balanceo.
-\end{itemize}
-\end{itemize}
-\end{frame}
-
-\begin{frame}
-\frametitle{Pruebas de diagnostico}
-\begin{itemize}
-\item[e)] \textbf{Distancia de Cook (D de Cook):} La distancia de Cook mide cómo cambia el vector de estimadores $\hat{\beta}$ cuando se elimina cada observación, por lo cuál es una medida útil para considerar como influyente una observación. La D de Cook se define como $D_{i}(M;C)=\frac{(\hat{\vec{\beta_{(i)}}}-\hat{\vec{\beta}})^T M(\hat{\vec{\beta_{(i)}}}-\hat{\vec{\beta}})}{C}$; i=1,...,n, donde $M=X^{T}X$ y $C=p\hat{\sigma^2}$. El criterio es:
-\begin{itemize}
-\item[-] Si $D_{i}\geq 1$, entonces la i-ésima observación puede considerarse como influyente.
-\end{itemize}
-\end{itemize}
-\end{frame}
-
-\begin{frame}
-\frametitle{Pruebas de diagnostico}
-\begin{itemize}
-\item[f)] \textbf{DFFITS:} $DFFITS_{i}$ es la cantidad de desviaciones estándar que cambia el valor ajustado $\hat{y_{i}}$ si se elimina la observación i. Este criterio no define exactamente si el punto es influyente o de balanceo, solo sugiere que se debe examinar la observación. Se define como $DFFITS_{i}=\frac{\hat{y_{i}}-\hat{y_{(i)}}}{\sqrt{S^2_{(i)}}h_{ii}}$ El criterio es:
-\begin{itemize}
-\item[-] Si $|DFFITS_{i}|>2\sqrt{\frac{p}{n}}=0.2182$, sugiere que se debe investigar la influencia de la i-ésima observación.
-\end{itemize}
-\end{itemize}
-\end{frame}
-
-\begin{frame}
-\frametitle{Pruebas de diagnostico}
-\begin{itemize}
-\item[g)] \textbf{DFBETAS:} Los $DFBETAS_{j,i}$ indica cuánto cambia el coeficiente de regresión $\hat{\beta_{j}}$ , en unidades de desviación estándar, si se omitiera la i-ésima observación. Esta se define como $DFBETAS_{ji}=\frac{\hat{\beta_{j}}-\hat{\beta_{j(i)}}}{\sqrt{S^{2}_{(i)}C_{jj}}}$ ; $C=(X^{T}X)^{-1}$. El criterio es:
-\begin{itemize}
-\item[-] Si $|DFBETAS_{ji}|>2/\sqrt{n}=0.1543$, entonces debe examinarse la i-ésima observación.
-\end{itemize}
-\end{itemize}
-\end{frame}
-
-\begin{frame}
-\frametitle{Pruebas de diagnostico}
-\begin{itemize}
-\item[h)] \textbf{COVRATIO:} Esta medida sirve para expresar el papel de la i-ésima observación en la precisión de la estimación y se define como $\frac{|S^{2}_{(i)}(X^{T}_{i}X_{(i)})^{-1}|}{|S^{2}(X^{T}X)^{-1}|} $ ; i=1,2,...,n. El criterio es:
-\begin{itemize}
-\item[-] Si $COVRATIO_{i}>1$, entonces la i-ésima observación mejora la precisión de la estimación.
-\item[-] Si $COVRATIO_{i}<1$, entonces la inclusión de la i-ésima observación disminuye la precisión de la estimación.
-\item[-] Si $COVRATIO_{i}>1+3\frac{p}{n}=1.0357$  o si $COVRATIO_{i}<1-3\frac{p}{n}=0.9643$, entonces la i-ésima observación debería ser considerada influyente. 
-\end{itemize}
-\end{itemize}
-\end{frame}
-
-\begin{frame}
-\frametitle{Resultados medidas de influencia}
+\frametitle{Análisis del modelo seleccionado}
+~\\Para el respectivo análisis del modelo, tenemos las siguientes dos tablas:
 \begin{center}
-\resizebox{12.2cm}{!} {
-\begin{tabular}{|cccccccc|}
+\begin{tabular}{|ccccc|}
 \hline 
-Observación & HAT & $\hat{r_{i}} $ &$D_{i}$ & $DFFITS_{i}$ & $DFBETAS_{(0),i}$ & $DFBETAS_{1,j}$ & $COVRATIO_{i}$ \\ 
+ & Estimación & Std. Error & Valor t & Pr($>|t|$) \\ 
 \hline 
-1 & 0.3384* & 9.8987499* & 15.8* & 7.07945* & -6.014452* & 7.02* & 0.602* \\ 
-2 & 0.07179* & 2.4606893 & 0.227 & 0.684351* & -0.516887* & 0.655* & 1.015 \\  
-76 & 0.01497 & 2.6539008 & 0.0516 & 0.327122* & 0.316146* & -0.254* & 0.945* \\  
-79 & 0.01497 & 2.6539008 & 0.0516 & 0.327122* & 0.316146* & -0.254* & 0.945* \\ 
-93 & 0.04881* & 0.2790688 & 0.00201 & 0.063217 & -0.044971 & 0.0592 & 1.063* \\ 
-153 & 0.16301 & -6.1311115* & 3* & -2.705776* & 2.210180* & -2.66* & 0.802* \\ 
-\hline 
-\end{tabular} 
-}
-\end{center}
-~\\Se puede observar que todas las observaciones de la tabla, excepto la 2, se podrían considerar influyentes por uno u otro criterio.
-\end{frame}
-
-\begin{frame}
-\frametitle{Modelo con intercepto 0}
-~\\El modelo planteado para que pase por el origen es: 
-$$PM_{2.5}=\beta_{1}PM_{10}$$
-~\\El modelo ajustado asumiendo que el intercepto es igual a cero es: 
-$$\hat{PM_{2.5}}=0.3638 PM_{10}$$
-\end{frame}
-
-\begin{frame}
-\frametitle{Bondad del modelo}
-~\\Para este modelo ajustado, tenemos los siguientes resultados que nos ayudaran a juzgar que tan bueno es:
-\begin{center}
-\begin{tabular}{|c|c|c|c|c|}
-\hline 
- & Estimación & Desviación Estandár & Estadistico T & P valor \\ 
-\hline 
-$\beta_{1}$ & 0.3638 & 0.0129 & 28.2 & $<2e-16$ \\ 
+Intercepto & 52921.688 & 17525.287 & 3.020 & 0.00266 \\ 
+Ingreso Mediano & 24923.244 & 2547.044 & 9.745 & $<2e-16$ \\  
+Edad Mediana & 3484.164 & 280.184 & 12.435 & $<2e-16$ \\ 
+Total Habitaciones & 17.588 & 6.632 & 2.652 & 0.00826 \\ 
+Población & -118.652 & 10.727 & -11.061 & $<2e-16$ \\  
+Hogares & 243.265 & 27.699 & 8.782 & $<2e-16$ \\ 
 \hline 
 \end{tabular} 
 \end{center}
 \begin{center}
 \begin{tabular}{|c|c|c|c|c|}
 \hline 
-$R^2$ & $R^2_{Ajustado}$ & $\hat{\sigma}$ & Estadistico F & Valor p \\ 
+$\hat{\sigma}$ & $R^2$ & $R^2_{Ajustado}$ & Estadístico F & P Valor \\ 
 \hline 
-0.8265 & 0.8254 & 6.978 & 795.4 & $<2.2e-16$ \\ 
-\hline 
-\end{tabular} 
-\end{center}
-\end{frame}
-
-\begin{frame}
-\frametitle{Comparación de modelos}
-\begin{figure}[h]
-  \centering
-  \includegraphics[scale=0.34]{imagenes/comp.pdf}
-  \caption{Gráfica comparativa de rectas de regresión}\label{figura1}
-\end{figure}
-\end{frame}
-
-\begin{frame}
-\frametitle{Comparación de modelos}
-~\\Para comparar los modelos tenemos la siguiente tabla comparativa:
-\resizebox{12.2cm}{!} {
-\begin{tabular}{|c|c|c|c|c|c|c|c|}
- \hline 
- Modelos & $R^{2}_{Ajustado}$ & $\hat{\sigma}$ & Estadistico F & Valor P & AIC & BIC & $SD(\beta_{1})$ \\ 
- \hline 
- Modelo 1 & 0.5729 & 6.7707 & 225 & $<2.2e-16$ & 1123.39 & 1132.762 & 0.03051  \\ 
- \hline 
- Modelo 2 & 0.8254 & 6.978 & 795.4 & $<2.2e-16$ & 1132.546 & 1138.794 & 0.0129\\ 
- \hline 
- \end{tabular}
- }  
-\end{frame}
-
-\begin{frame}
-\frametitle{Comparación modelos}
-~\\Seleccionamos como mejor modelo, al primero, en el cuál se ajusto con su intercepto, ya que los criterios de selección AIC y BIC dieron menores para este, además, la desviación del modelo a los datos es menor. Nos podría engañar en la selección el $R^2$ y el $R^2_{Ajustado}$, ya que estos aumentan casi en un $25\%$ lo cuál nos podría tentar a elegirlo como el mejor,este aumento ocurre ya que, al no haber intercepto, casi toda la variabilidad de Y ($PM_{2.5}$) es atribuible a X($PM_{10}$) eso explica el $R^2$ de $82\%$. Además, en el modelo sin intercepto $E(\hat{e})$ no es precisamente cero, en este caso esta cerca de -1, lo cuál es inadecuado.
-\end{frame}
-
-\begin{frame}
-\frametitle{Pruebas de diagnostico modelo 2}
-~\\Los resultados de las medidas de influencia y las pruebas de diagnostico para este modelo se resumen en la siguiente tabla:
-
-\begin{center}
-\resizebox{12.2cm}{!} {
-\begin{tabular}{|ccccccc|}
-\hline 
-Observación & HAT & $\hat{r_{i}} $ &$D_{i}$ & $DFFITS_{i}$ & $DFBETAS_{1,j}$ & $COVRATIO_{i}$ \\ 
-\hline 
-1 & 0.094157* & 10.625441* & 7.03* & 3.43* &  3.43* & 0.661* \\ 
-2 & 0.03084* & 3.048048* & 0.282 & 0.544* & 0.544* & 0.983 \\  
-76 & 0.000987 & 2.146917  & 0.00446 & 0.0675 &  0.0675 & 0.980* \\  
-79 & 0.000987 & 2.146917 & 0.00446 & 0.0675  & 0.0675 & 0.980* \\ 
-93 & 0.024110* & 0.788304 & 0.0154 & 0.124  & 0.124 & 1.027* \\ 
-153 & 0.054247* & -4.141674*  & 0.897 & -0.992*  & -0.992* & 0.964* \\ 
-\hline 
-\end{tabular} 
-}
-\end{center}
-\end{frame}
-
-\begin{frame}
-\frametitle{Validación de supuestos, modelo con intercepto}
-\begin{itemize}
-\item[a)] Correcta especificación (Linealidad): Para evaluar la correcta especificación del modelo, simplemente nos basamos en las siguientes dos gráficas. 
-\begin{figure}[h]
-  \centering
-  \includegraphics[scale=0.31]{imagenes/coresp.pdf}
-  \caption{Gráficos para detectar incorrecta especificación }\label{figura1}
-\end{figure}
-\end{itemize}
-\end{frame}
-
-\begin{frame}
-\frametitle{Validación de supuestos, modelo con intercepto}
-\begin{itemize}
-\item[b)] Normalidad de los errores: Para verificar este supuesto, se realizaron nuevamente dos gráficas, la primera, un histograma de los residuales para ver una posible forma de distribución de estos, y la segunda, el Q-Qplot, que muestra que tanto se asemeja la distribución de los residuales a la distribución normal. En ambas gráficas se evidencia que la distribución de los residuales no es normal, se puede ver en ambas que la cola derecha de la distribución de los residuales es mucho más pesada que en la distribución normal. Además aplicamos la prueba Shapiro-Wilk para confirmar nuestra creencia, esta prueba nos arrojo un estadístico de $W = 0.85121$ y un p valor= 8.796e-12, por tanto se rechaza $H_{0}$ y se concluye que la distribución de los residuales no es normal.
-\end{itemize}
-\end{frame}
-
-\begin{frame}
-\frametitle{Validación de supuestos, modelo con intercepto}
-\begin{figure}[h]
-  \centering
-  \includegraphics[scale=0.34]{imagenes/norm.pdf}
-  \caption{Gráficos para evaluar la normalidad en los errores}\label{figura1}
-\end{figure}
-\end{frame}
-
-\begin{frame}
-\frametitle{Validación de supuestos, modelo con intercepto}
-\begin{itemize}
-\item[c)] Homocedasticidad: Para probar la homocedasticidad, se analiza la misma gráfica realizada en el literal a (los residuales vs los $\hat{y}$), donde no se ve claramente el incumplimiento de este supuesto, por lo cual se realizaron las pruebas Goldfeld-Quandt y Breusch-Pagan, se eligieron estas, ya que todas las otras pruebas más conocidas y utilizadas (Levene, Barlett, Cochran, etc) algunas requieren repeticiones en X y otros supuestos. La prueba Goldfeld-Quandt nos arrojo un estadístico de prueba $GQ = 0.6068$ y un p valor de 0.02487, y la prueba Breusch-Pagan nos arrojó un estadístico de prueba $BP = 83.079$ y un p valor asociado de aproximadamente 0 (< 2.2e-16). Por lo cuál en ambas pruebas se rechaza la hipótesis nula,y concluimos que los residuos del modelo no cumplen con el supuesto de homocedasticidad de varianza.
-\end{itemize}
-\end{frame}
-
-\begin{frame}
-\frametitle{Validación de supuestos, modelo con intercepto}
-\begin{itemize}
-\item[d)] Independencia en los errores: Sabemos que no se puede probar a ciencia cierta la independencia en los errores, sin embargo, para tener cierta idea sobre este supuesto, analizamos los residuales gráficamente (correlograma) y le aplicamos la prueba de Durbin Watson para darnos cuenta si estos tienen cierta correlación o dependencia. La prueba de Durbin-Watson nos arrojo un estadístico $DW = 1.1683$ y un p valor de 2.183e-08, entonces, para un nivel de significancia de 0.05, se rechaza $H_{0}$ y se concluye que la correlación entre los errores es diferente de cero.
-\end{itemize}
-\end{frame}
-
-\begin{frame}
-\frametitle{Validación de supuestos, modelo con intercepto}
-\begin{figure}[h]
-  \centering
-  \includegraphics[scale=0.34]{imagenes/corr.pdf}
-  \caption{Gráficos para evaluar la independencia en los errores}\label{figura1}
-\end{figure}
-\end{frame}
-
-\begin{frame}
-\frametitle{Regresión Robusta}
-~\\Un proceso de regresión robusta es aquel que amortigua el efecto de las observaciones que serían muy influyentes si se usaran los mínimos cuadrados.
-~\\Para aplicar regresión robusta existen varios métodos, entre lo más utilizados están:
-\begin{itemize}
-\item Método M (máxima verosimilitud): Le asigna una función de peso a los residuales, de forma que entre mayor sea el valor del residual menos peso le pone, por ende este método le da menos importancia a valores con residuales grandes.
-\item Método LTS (Cuadrados menos recortados): Intenta minimizar la suma de residuos cuadrados.
-\end{itemize}
-\end{frame}
-
-\begin{frame}
-\frametitle{Regresión Robusta}
-\begin{itemize}
-\item Método S: Encuentra una línea (plano o hiperplano) que minimiza una estimación robusta de la escala (de la cual el método obtiene la S en su nombre) de los residuos.
-\item Método MM: Intenta retener la solidez y la resistencia de la estimación S, mientras que gana la eficiencia de la estimación M. El método procede al encontrar una estimación S altamente robusta y resistente que minimiza una M-estimación de la escala de los residuos.
-\end{itemize}
-~\\Seleccionamos el método MM para la estimación de los coeficientes por ser el más robusto y el de mejor comportamiento, el modelo ajustado usando este método fue:
-$$\hat{PM_{2.5}}=0.7196+0.3092 PM_{10}$$
-
-\end{frame}
-
-\begin{frame}
-\frametitle{Regresión Robusta}
-\begin{figure}[h]
-  \centering
-  \includegraphics[scale=0.34]{imagenes/robusta.pdf}
-  \caption{Gráficos para evaluar la independencia en los errores}\label{figura1}
-\end{figure}
-\end{frame}
-
-\begin{frame}
-\frametitle{Bondad del modelo}
-~\\Para este modelo ajustado, tenemos los siguientes resultados que nos ayudaran a juzgar que tan bueno es:
-\begin{center}
-~\\\begin{tabular}{|c|c|c|c|c|}
-\hline 
- & Estimación & Desviación Estandár & Estadistico T & P valor \\ 
-\hline 
-$\beta_{0}$ & 0.7196 & 0.9259 & 0.7771 & 0.4382 \\ 
-\hline 
-$\beta_{1}$ & 0.3092 & 0.0222 & 13.9372 & 0 \\ 
-\hline 
-\end{tabular} 
-\end{center}
-\begin{center}
-\begin{tabular}{|c|c|c|}
-\hline 
- $\hat{\sigma}$ & AIC & BIC \\ 
-\hline 
- 4.824 & 1147.121 & 1156.493 \\ 
+81990 & 0.5417 & 0.5371 & 116.8 & $<2.2e-16$ \\ 
 \hline 
 \end{tabular} 
 \end{center}
 \end{frame}
 
 \begin{frame}
-\frametitle{Comparación de modelos}
-~\\Para comparar los modelos tenemos la siguiente tabla comparativa:
-\resizebox{12.2cm}{!} {
-\begin{tabular}{|c|c|c|c|c|c|c|c|}
- \hline 
- Modelos & $R^{2}_{Ajustado}$ & $\hat{\sigma}$ & Estadistico F & Valor P & AIC & BIC & $SD(\beta_{1})$ \\ 
- \hline 
- Modelo 1 & 0.5729 & 6.7707 & 225 & $<2.2e-16$ & 1123.39 & 1132.762 & 0.03051  \\ 
- \hline 
- Modelo 2 & 0.8254 & 6.978 & 795.4 & $<2.2e-16$ & 1132.546 & 1138.794 & 0.0129\\ 
- \hline 
- Modelo Robusto &    & 4.824 &  &  & 1147.121 & 1156.493 & 0.0222 \\
- \hline 
- \end{tabular}
- }  
-~\\Podemos concluir que el mejor modelo es el último (Regresión Robusta), ya que, el criterio de comparación entre un modelo MCO y un modelo Robusto es la varianza del modelo, el cambio de los coeficientes de regresión y las desviaciones de esos coeficientes.
+\frametitle{Análisis del modelo seleccionado}
+~\\Podemos ver en las dos tablas anteriores que todas las variables incluidas son significativas (el p valor de cada una de ellas es menor a 0.05) y por tanto, el modelo en general también es significativo. Además, tanto el $R^2$ como el $R^2_{Ajustado}$ son casi los mismos que los del modelo completo (0.5425 y 0.537 respectivamente), por lo tanto podríamos concluir que la inclusión de la variable Total de Dormitorios no daba un aporte adicional a la explicación del valor mediano de la vivienda. Adicionalmente, la desviación del modelo a los datos disminuyó un poco (de 82000 del modelo completo a 81990 en el modelo con selección de variables), por lo cuál se podría decir que la variable excluida en este problema en particular solo servía para aumentar los costos de recolección de datos y para aumentar la desviación del modelo y en general, las desviaciones de los valores ajustados.
 \end{frame}
 
 \begin{frame}
-\frametitle{Conclusión}
-~\\Podemos ver que la desviación del modelo disminuyó de 6.7707 a 4.824,los coeficientes estimados cambiaron considerablemente y las desviaciones de las estimaciones también disminuyeron considerablemente. En este caso, no se toma muy en cuenta el AIC y el BIC, ya que estos criterios no se pueden usar para comparar modelos obtenidos por métodos diferentes (MCO y Regresión Robusta). Además, es muy razonable elegir el modelo ajustado por regresión robusta, ya que los supuestos del modelo 1 no se cumplen, por lo cuál las estimaciones por MCO y en general la teoría de los Mínimos Cuadrados Ordinarios es inadecuada y no se debe usar al no cumplirse sus supuestos. 
+\frametitle{Ventajas y desventajas de los algoritmos y métodos utilizados}
+~\\Como ventajas o desventajas para el método y para los dos algoritmos tenemos las siguientes:
+\begin{itemize}
+\item $R^2_{Ajustado}$
+~\\Desventajas:
+\begin{itemize}
+\item[1.] Es el mas tedioso de todos en cuanto a cálculos, ya que toca ajustar todos los posibles modelos para todas las posibles combinaciones de variables, es decir, se deben ajustar todos los posibles modelos (6) para una variable, todos los posibles (15) para 2 variables, y así sucesivamente. En total en este caso son $6 \choose 1$ + $ 6 \choose 2$ + $ 6\choose 3$ +...+ $6\choose 6$ $=63$ modelos que se deben ajustar.
+\end{itemize}
+\end{itemize}
 \end{frame}
+
+\begin{frame}
+\frametitle{Ventajas y desventajas de los algoritmos y métodos utilizados}
+\begin{itemize}
+\item[2.] El criterio de selección es el más débil, ya que solo usamos el $R^2_{Ajustado}$ para decidir, y está demostrado que es mejor criterio el AIC porque no solo penaliza por la cantidad de parámetros o la complejidad del modelo, sino también por la capacidad predictiva que este tiene.
+\item[3.] Al seleccionar al modelo con mayor $R^2_{Ajustado}$ no toma en cuenta si en realidad esas diferencias entre $R^2$ es significativa, es decir, un modelo con 4 variables como nos sucedió puede tener un $R^2_{Ajustado}$ de 0.5314 y el modelo con 5 tener un $R^2_{Ajustado}$ de 0.5371, y puede no valer la pena incluir la quinta variable para un aumento tan insignificante en el $R^2_{Ajustado}$, ya que eso implicaría mas costos y trabajo en la medición de ella.   
+\end{itemize}
+\end{frame}
+
+\begin{frame}
+\frametitle{Ventajas y desventajas de los algoritmos y métodos utilizados}
+~\\ Ventajas:
+\begin{itemize}
+\item[1.] La regla de decisión y de selección es muy sencilla de calcular y de aplicar.
+\end{itemize}
+\end{frame}
+
+\begin{frame}
+\frametitle{Ventajas y desventajas de los algoritmos y métodos utilizados}
+\begin{itemize}
+\item Algoritmo Backward
+~\\ Desventajas:
+\begin{itemize}
+\item[1.] Tiene la desventaja de necesitar mucha capacidad de cálculo si la cantidad de variables regresoras es grande.
+\item[2.] Puede conducir a problemas de multicolinealidad si las variables están relacionadas, ya que esta no evalúa la salida de posibles variables ante la entrada de otras.
+\end{itemize}
+\end{itemize}
+\end{frame}
+
+\begin{frame}
+\frametitle{Ventajas y desventajas de los algoritmos y métodos utilizados}
+~\\ Ventajas:
+\begin{itemize}
+\item[1.] No elimina variables significativas para el modelo.
+\item[2.] No necesita que se defina un término como umbral, ni que se defina la cantidad de variables a seleccionar.
+\end{itemize}
+\end{frame}
+
+\begin{frame}
+\frametitle{Ventajas y desventajas de los algoritmos y métodos utilizados}
+\begin{itemize}
+\item Algoritmo StepAIC
+~\\ Desventajas:
+\begin{itemize}
+\item[1.] La única desventaja que logramos encontrar en este método es la gran cantidad de cálculos que se deben hacer, ya que se tienen que ajustar demasiados modelos y encontrar su AIC correspondiente.
+\end{itemize}
+\end{itemize}
+\end{frame}
+
+\begin{frame}
+\frametitle{Ventajas y desventajas de los algoritmos y métodos utilizados}
+~\\ Ventajas:
+\begin{itemize}
+\item[1.] Usa como criterio de selección el criterio de información de Akaike (AIC), el cuál es un criterio bastante completo y mejor que el $R^2_{Ajustado}$
+\item[2.] Este algoritmo evita los posibles problemas de multicolinealidad que se pueden generar usando, por ejemplo, el Backward o el Fordward, ya que este no mantiene fijas en el modelo las variables que ya entraron en una etapa, es decir, siempre se esta evaluando la salida de variables ante la entrada de nuevas.
+\end{itemize}
+\end{frame}
+
+\begin{frame}
+\frametitle{Conclusiones}
+~\\Con respecto al método y a los algoritmos de selección utilizados, podemos concluir que el mejor es el StepAIC, ya que incluye el Backward y además incorpora un criterio de selección que es el AIC, el cuál es mejor que el $R^2_{Ajustado}$. Adicionalmente, este criterio como ya se mencionó en las ventajas, evalúa la posible salida de variables ante la entrada de otras, es decir, tiene en cuenta la interacción o el aporte y la capacidad explicativa que le dan las variables conjuntamente, evitando de esa forma problemas de multicolinealidad. En este caso, casualmente todos los métodos nos arrojaron el mismo modelo (sin la variable total de dormitorios), por lo que no podemos hacer una comparación entre los modelos obtenidos y decidir cual es mejor, pero esperamos que al usarlo con otros datos, el mejor modelo sea el obtenido por el método StepAIC.
+\end{frame}
+
+\begin{frame}
+\frametitle{Conclusiones}
+~\\De manera general, teniendo en cuenta el trabajo acumulado en estos datos y en tratar de ajustar un modelo para la variable Valor mediano de la vivienda, podemos concluir que este es el mejor modelo que logramos obtener por el método MCO, ya que disminuyó la varianza del modelo manteniendo constante el $R^2_{Ajustado}$, sin embargo, vimos en la Tarea 3, que los supuestos de este modelo no se cumplen, por lo cuál se hace inadecuado el uso de los mínimos cuadrados ordinarios. Entonces se puede decir que este siendo el mejor modelo que logramos obtener por MCO, no es recomendable su uso, ya que sus estimaciones pueden no ser efectivas por la varianza de ellas y en general por el incumplimiento de sus supuestos.
+\end{frame}
+
 \end{document}

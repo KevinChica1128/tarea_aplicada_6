@@ -24,7 +24,7 @@ library(leaps)
 modeloback <- regsubsets(cadata$Valor_mediano_de_la_casa ~ cadata$Ingreso_mediano+
                             cadata$Edad_mediana_de_la_vivienda+cadata$Total_de_habitaciones+
                             cadata$Total_de_dormitorios+cadata$Poblacion+cadata$Hogares,
-                         data = cadata, method = "backward")
+                         data = cadata, method = "exhaustive")
 S<-summary(modeloback)
 S$outmat
 modeloR2<-which.max(S$adjr2) #El mejor modelo con el R2 ajus es el de 5 variables.
@@ -32,6 +32,11 @@ modeloCP<-which.min(S$cp) #Al igual que con el CP
 modeloBIC<-which.min(S$bic) #Y con el BIC
 coef(modeloback,5) #Coeficientes del mejor modelo
 
+x11()
+plot(S$adjr2,xlab="Número de variables",ylab = "R cuadrado Ajustado",
+     type = "l",ylim = c(0,0.6),main = "Número de variables vs R cuadrado ajustado")
+points(modeloR2,S$adjr2[modeloR2],col="red",cex=2,pch=20)
+text(1:6,S$adjr2+0.02,labels =c(0.2155,0.3701,0.4197,0.5314,0.5371,0.5369) )
 #Con el código 2
 #Matriz X:
 X<-matrix(c(cadata$Ingreso_mediano,cadata$Edad_mediana_de_la_vivienda,cadata$Total_de_habitaciones,

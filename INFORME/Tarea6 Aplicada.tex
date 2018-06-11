@@ -127,12 +127,17 @@ de grado.tex}) and can be used as a guideline just replacing its contents. It is
 % Título de la primera sección
 % **** --------------------------------------------------------------------------------
 \section{Introducción}
-~\\En este trabajo se presentarán dos algoritmos de selección de variables que son el Backward y el StepAIC, donde el criterio de selección para el Backward será el $R^2_{adj}$, se tratará de encontrar el mejor modelo posible aplicando estos dos algoritmos para los 500 datos seleccionados de la base de datos 'Cadata', y se analizará este modelo final. Además, se presentaran una serie de ventajas y desventajas de cada uno de los métodos y se obtendrán conclusiones a partir de los resultados arrojados.
+~\\En este trabajo se presentarán un método de selección de modelos que es el $R^2_{Ajustado}$ y dos algoritmos que son el Backward y el StepAIC, con ellos, se tratará de encontrar el mejor modelo posible para los 500 datos seleccionados de la base de datos 'Cadata', y se analizará el modelo obtenido. Además, se presentaran una serie de ventajas y desventajas de cada uno de los métodos y se formularan conclusiones a partir de los resultados arrojados.
 
 ~\\En la mayoría de los problemas de construcción de modelos el analista tiene un grupo de regresores candidatos y debe determinar el subconjunto real de
 regresores que debe usarse en el modelo. La definición de un subconjunto adecuado de regresores para el modelo es lo que se llama problema de selección de variables.
 
 ~\\La construcción de un modelo de regresión que sólo incluya un subconjunto de los regresores disponibles implica dos objetivos contrapuestos: 1) Se desea que el modelo incluya tantos regresores como sea posible, para que el contenido de información en ellos pueda influir sobre el valor predicho de y. 2) Se desea que el modelo incluya los menos regresores que sea posible, porque la varianza de la predicción $\hat{y}$ aumenta a medida que aumenta la cantidad de regresores. También, mientras más regresores haya en un modelo, los costos de recolección de datos y los de mantenimiento de modelo serán mayores. Entonces, con la selección de variables se trata de encontrar el punto medio entre los dos objetivos anteriores, logrando hallar así la 'mejor' recta de regresión.
+
+~\\El modelo completo con todas las variables bajo el cual se está trabajando es:
+
+~\\$\hat{ValorMediano} = 57720.52 + 24261.20IngresoMediano + 3443.94EdadMediana + 19.09TotalHabitaciones$
+$$ - 67.72TotalDormitorios - 121.66Poblacion +315.92Hogares $$
 \section{Descripción de criterios y algoritmos de selección}
 
 \begin{itemize}
@@ -140,7 +145,7 @@ regresores que debe usarse en el modelo. La definición de un subconjunto adecuad
 ~\\El $R^2_{Ajustado}$ se define como:
 $$R^2_{Adj}=1-\frac{N-1}{N-k-1}(1-R^2)$$ 
 ~\\Donde N es el tamaño de muestra y k es la cantidad de parámetros del modelo y $R^2=\frac{SCR_{D}}{SCT_{D}}=\frac{\sum\limits_{i=1}^{n}(\hat{y_{i}}-\bar{y})^2}{\sum\limits_{i=1}^{n}(y_{i}-\bar{y})^2}$.
-\item Backward (selección hacia atrás): Como su nombre lo indica se comienza por considerar incluidas en el modelo teórico a todas las variables disponibles y se van eliminando del modelo de una en una según su capacidad explicativa. Para esto,  la primera variable que se elimina es aquella que presenta un menor coeficiente de correlación parcial  con la variable dependiente o lo que es equivalente, un menor valor del estadístico t y así sucesivamente hasta llegar a una situación en la que la eliminación de una variable más suponga un descenso demasiado acusado en el coeficiente de determinación.
+\item Backward (selección hacia atrás): Como su nombre lo indica se comienza por considerar incluidas en el modelo teórico a todas las variables disponibles y se van eliminando del modelo de una en una según su capacidad explicativa. Para esto,  la primera variable que se elimina es aquella que presenta un menor coeficiente de correlación parcial  con la variable dependiente o lo que es equivalente, un menor valor del estadístico W y así sucesivamente hasta llegar a una situación en la que la eliminación de una variable más suponga un descenso demasiado acusado en el coeficiente de determinación.
 ~\\Algoritmo:
 \begin{itemize}
 \item[1.] Se toma el modelo completo (con todas las variables disponibles)
@@ -201,6 +206,14 @@ $\hat{\sigma}$ & $R^2$ & $R^2_{Ajustado}$ & Estadístico F & P Valor \\
 
 ~\\Podemos ver en las dos tablas anteriores que todas las variables incluidas son significativas (el p valor de cada una de ellas es menor a 0.05) y por tanto, el modelo en general también es significativo. Además, tanto el $R^2$ como el $R^2_{Ajustado}$ son casi los mismos que los del modelo completo (0.5425 y 0.537 respectivamente), por lo tanto podríamos concluir que la inclusión de la variable Total de Dormitorios no daba un aporte adicional a la explicación del valor mediano de la vivienda. Adicionalmente, la desviación del modelo a los datos disminuyó un poco (de 82000 del modelo completo a 81990 en el modelo con selección de variables), por lo cuál se podría decir que la variable excluida en este problema en particular solo servía para aumentar los costos de recolección de datos y para aumentar la desviación del modelo y en general, las desviaciones de los valores ajustados.
 
+\begin{figure}[h]
+  \centering
+  \includegraphics[scale=0.39]{FigurasUV/r2.pdf}
+  \caption{Gráfico de número de variables contra $R^2_{Ajustado}$}\label{figura1}
+\end{figure}
+
+~\\En esta imagen podemos ver la representación gráfica del método del $R^2_{Ajustado}$, los 6 modelos representados correspondientes a 1,2,3,4,5 y 6 variables, son los mejores modelos que se pueden construir con tal número de variables con respecto al $R^2_{Ajustado}$, es decir, la gráfica muestra el $R^2_{Ajustado}$ del mejor modelo con cada número de variables pero en el trasfondo ya se han ajustado todos los posibles modelos por cantidad de variables. Lo que hace el método es elegir al modelo con el $R^2_{Ajustado}$ más alto, por lo cuál elige al mejor modelo con 5 variables que es el mencionado anteriormente.
+
 \section{Ventajas y desventajas de los algoritmos y métodos utilizados}
 ~\\Como ventajas o desventajas para el método y para los dos algoritmos tenemos las siguientes:
 \begin{itemize}
@@ -210,6 +223,7 @@ $\hat{\sigma}$ & $R^2$ & $R^2_{Ajustado}$ & Estadístico F & P Valor \\
 \begin{itemize}
 \item[1.] Es el mas tedioso de todos en cuanto a cálculos, ya que toca ajustar todos los posibles modelos para todas las posibles combinaciones de variables, es decir, se deben ajustar todos los posibles modelos (6) para una variable, todos los posibles (15) para 2 variables, y así sucesivamente. En total en este caso son $6 \choose 1$ + $ 6 \choose 2$ + $ 6\choose 3$ +...+ $6\choose 6$ $=63$ modelos que se deben ajustar.
 \item[2.] El criterio de selección es el más débil, ya que solo usamos el $R^2_{Ajustado}$ para decidir, y está demostrado que es mejor criterio el AIC porque no solo penaliza por la cantidad de parámetros o la complejidad del modelo, sino también por la capacidad predictiva que este tiene.
+\item[3.] Al seleccionar al modelo con mayor $R^2_{Ajustado}$ no toma en cuenta si en realidad esas diferencias entre $R^2$ es significativa, es decir, un modelo con 4 variables como nos sucedió puede tener un $R^2_{Ajustado}$ de 0.5314 y el modelo con 5 tener un $R^2_{Ajustado}$ de 0.5371, y puede no valer la pena incluir la quinta variable para un aumento tan insignificante en el $R^2_{Ajustado}$, ya que eso implicaría mas costos y trabajo en la medición de ella.   
 \end{itemize}
 \item Algoritmo Backward:
 \begin{itemize}
